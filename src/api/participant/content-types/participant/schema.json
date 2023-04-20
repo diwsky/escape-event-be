@@ -1,0 +1,53 @@
+{
+  "kind": "collectionType",
+  "collectionName": "participants",
+  "info": {
+    "singularName": "participant",
+    "pluralName": "participants",
+    "displayName": "Participant"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "bib_name": {
+      "type": "string"
+    },
+    "emergency_name": {
+      "type": "string"
+    },
+    "address": {
+      "type": "text"
+    },
+    "emergency_number": {
+      "type": "string"
+    },
+    "tshirt_size": {
+      "type": "enumeration",
+      "enum": [
+        "xxxs",
+        "xxs",
+        "xs",
+        "s",
+        "m",
+        "l",
+        "xl",
+        "xxl",
+        "xxxl",
+        "xxxxl",
+        "xxxxxl"
+      ]
+    },
+    "ktp_file": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": false
+    }
+  }
+}
