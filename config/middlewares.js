@@ -1,6 +1,31 @@
-module.exports = [
+module.exports = ({env}) => [
   'strapi::errors',
-  'strapi::security',
+  {
+        name: 'strapi::security',
+        config: {
+          contentSecurityPolicy: {
+            useDefaults: true,
+            directives: {
+              'connect-src': ["'self'", 'https:'],
+              'img-src': [
+                "'self'",
+                'data:',
+                'blob:',
+                'dl.airtable.com',
+         	'escape-backend-s3.s3.ap-southeast-1.amazonaws.com',
+              ],
+              'media-src': [
+                "'self'",
+                'data:',
+                'blob:',
+                'dl.airtable.com',
+                'escape-backend-s3.s3.ap-southeast-1.amazonaws.com',
+              ],
+              upgradeInsecureRequests: null,
+            },
+          },
+        },
+      },
   'strapi::cors',
   'strapi::poweredBy',
   'strapi::logger',
@@ -9,4 +34,5 @@ module.exports = [
   'strapi::session',
   'strapi::favicon',
   'strapi::public',
+  { resolve: './src/middlewares/admin-redirect' },
 ];
