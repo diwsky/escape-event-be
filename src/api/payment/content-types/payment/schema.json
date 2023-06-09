@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "payments",
+  "info": {
+    "singularName": "payment",
+    "pluralName": "payments",
+    "displayName": "Payment",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "PENDING",
+        "PAID",
+        "EXPIRED"
+      ]
+    },
+    "invoice_id": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "biginteger"
+    },
+    "invoice_url": {
+      "type": "string"
+    },
+    "external_id": {
+      "type": "string"
+    }
+  }
+}

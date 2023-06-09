@@ -1,0 +1,55 @@
+{
+  "collectionName": "components_component_utama_my_components",
+  "info": {
+    "displayName": "user_detail",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "bib_name": {
+      "type": "string"
+    },
+    "club": {
+      "type": "string"
+    },
+    "emergency_name": {
+      "type": "string"
+    },
+    "emergency_number": {
+      "type": "string"
+    },
+    "tshirt_size": {
+      "type": "enumeration",
+      "enum": [
+        "xxxs",
+        "xxs",
+        "xs",
+        "s",
+        "m",
+        "l",
+        "xl",
+        "xxl",
+        "xxxl"
+      ]
+    },
+    "phone": {
+      "type": "string"
+    },
+    "address": {
+      "type": "text"
+    },
+    "dob": {
+      "type": "string"
+    },
+    "gender": {
+      "type": "enumeration",
+      "enum": [
+        "male",
+        "female"
+      ]
+    },
+    "email": {
+      "type": "string"
+    }
+  }
+}
