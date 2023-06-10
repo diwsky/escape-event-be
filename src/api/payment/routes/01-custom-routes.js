@@ -20,7 +20,7 @@ module.exports = {
     },
     {
       method: "POST",
-      path: "/payments/invoice_callback",
+      path: "/payments/receive_payment",
       handler: "payment.receivePayment",
       config: {
         policies: [],

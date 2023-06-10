@@ -31,6 +31,12 @@
     },
     "external_id": {
       "type": "string"
+    },
+    "webhook_id": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string"
     }
   }
 }

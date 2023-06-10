@@ -23,16 +23,13 @@
     "event_uid": {
       "type": "string"
     },
-    "status": {
-      "type": "string"
-    },
-    "bib": {
-      "type": "biginteger"
-    },
     "payments": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::payment.payment"
+    },
+    "bib": {
+      "type": "string"
     }
   }
 }
