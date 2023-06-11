@@ -30,6 +30,9 @@
     },
     "bib": {
       "type": "string"
+    },
+    "user_id": {
+      "type": "string"
     }
   }
 }

@@ -15,21 +15,33 @@ module.exports = createCoreService(
       eventUid,
       paymentId
     ) {
-      const { user_detail } = await strapi.entityService.findOne(
+      const { user_detail, user } = await strapi.entityService.findOne(
         "api::user-detail.user-detail",
         userDetailId,
         {
-          populate: ["user_detail"],
+          populate: {
+            user_detail: {
+              fields: "*",
+            },
+            user: {
+              fields: ["id"],
+            },
+          },
         }
       );
 
-      console.log("addParticipantToEvent - userDetail: ", user_detail);
+      console.log(
+        "addParticipantToEvent - userDetail & user: ",
+        user_detail,
+        user
+      );
 
       const participantPendingPayment = await strapi.entityService.create(
         "api::participant.participant",
         {
           data: {
             user_detail,
+            user_id: `${user.id}`,
             category_uid: categoryUid,
             event_uid: eventUid,
             payments: paymentId,
