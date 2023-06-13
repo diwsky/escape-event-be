@@ -38,7 +38,7 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
 
     try {
       const invoice = await i.createInvoice({
-        externalID: `escape-invoice-${Date.now()}`,
+        externalID: `escape-${Date.now()}`,
         description: `${eventName} - ${categoryName}`,
         amount: price,
         customer: {
@@ -108,6 +108,7 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
 
       // check if token is not same (not from xendit), reject!
       if (token != process.env.XENDIT_CALLBACK_TOKEN) {
+        console.log("token different!");
         ctx.response.status = 403;
         return;
       }
@@ -159,7 +160,10 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
         return;
       }
 
-      // TODO: send email to peserta!
+      // TODO: send email to peserta! using invoice id
+      // await strapi
+      // .service("api::participant.participant")
+      // .sendRegistrationSuccessEmail(id);
 
       ctx.response.status = 200;
     } catch (error) {
