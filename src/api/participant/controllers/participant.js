@@ -23,7 +23,7 @@ module.exports = createCoreController(
       // strapi
       //   .service("api::category.category")
       //   .getEventAndCategoryName(category_uid);
-      const invoice_id = "6485e0f636322b16c76100b5";
+      const invoice_id = "648918c2a9ad2f0c687f237d";
 
       try {
         await strapi

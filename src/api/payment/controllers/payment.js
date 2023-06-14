@@ -108,8 +108,8 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
 
       // check if token is not same (not from xendit), reject!
       if (token != process.env.XENDIT_CALLBACK_TOKEN) {
-        console.log("token different!");
         ctx.response.status = 403;
+        ctx.response.message = "Identity not valid!";
         return;
       }
 
@@ -125,6 +125,7 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
 
       if (duplicateWebhook.length > 0) {
         ctx.response.status = 409;
+        ctx.response.message = "Duplicate callback!";
         console.log("Error @ receive payment - duplicate webhook!");
         return;
       }
@@ -160,10 +161,9 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
         return;
       }
 
-      // TODO: send email to peserta! using invoice id
-      // await strapi
-      // .service("api::participant.participant")
-      // .sendRegistrationSuccessEmail(id);
+      await strapi
+        .service("api::participant.participant")
+        .sendRegistrationSuccessEmail(id);
 
       ctx.response.status = 200;
     } catch (error) {
