@@ -6,50 +6,6 @@
 
 const { createCoreService } = require("@strapi/strapi").factories;
 
-const composeEmail = ({
-  user_detail,
-  bib,
-  eventName,
-  categoryName,
-  external_id,
-  channel,
-}) => {
-  console.log(user_detail);
-  return `
-  <h1>Terima kasih anda telah mendaftar di ${eventName}!</h1>
-  <body>Berikut adalah detail registrasi anda:</body><br/>
-  <br/>
-  <h3>Nomor BIB: <b>${bib}</b></h3>
-  <br/>
-  Nomor pembayaran: <b>${external_id}</b><br/>
-  Pembayaran: <b>${channel}</b><br/>
-  Kategori: <b>${eventName} - ${categoryName}</b><br/>
-  <br/>
-  -----------
-  <br/>
-  Nama BIB: <b>${user_detail.bib_name}</b><br/>
-  Tanggal Lahir: <b>${user_detail.dob}</b><br/>
-  Jenis Kelamin: <b>${user_detail.gender}</b><br/>
-  No. HP: <b>${user_detail.phone}</b><br/>
-  Alamat: <b>${user_detail.address}</b><br/>
-  <br/>
-  -----------
-  <br/>
-  Nama Klub: <b>${user_detail.club}</b><br/>
-  Kontak Darurat: <b>${user_detail.emergency_name} - ${user_detail.emergency_number}</b><br/>
-  Jersey Size: <b>${user_detail.tshirt_size}</b><br/>
-  
-  Bila ada keraguan atau permintaan perubahan data, dapat hubungi narahubung:
-
-  Website: https://escape-nice.id
-  Instagram:....
-
-  Salam,
-
-  Escape Nice
-  `;
-};
-
 module.exports = createCoreService(
   "api::participant.participant",
   ({ strapi }) => ({
@@ -236,7 +192,7 @@ module.exports = createCoreService(
             to: user_detail.email,
             bcc: "escapenice.event@gmail.com",
             from: `Escape Nice <${process.env.MAIL_FROM}>`,
-            subject: `Pendaftaran ${eventName} berhasil!`,
+            subject: `Pendaftaran ${eventName}`,
             html: content,
           });
       } catch (error) {
