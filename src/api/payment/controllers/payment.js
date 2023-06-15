@@ -7,13 +7,6 @@
 const { createCoreController } = require("@strapi/strapi").factories;
 
 module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
-  async getInvoice(ctx, next) {
-    try {
-      const body = ctx.body;
-    } catch (err) {
-      ctx.body = err;
-    }
-  },
   async createInvoice(ctx, next) {
     const body = ctx.request.body;
 

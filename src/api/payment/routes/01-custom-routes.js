@@ -3,16 +3,8 @@
 module.exports = {
   routes: [
     {
-      method: "GET",
-      path: "/payments/get_invoice",
-      handler: "payment.getInvoice",
-      config: {
-        policies: [],
-      },
-    },
-    {
       method: "POST",
-      path: "/payments/create_invoice",
+      path: "/payments/invoice",
       handler: "payment.createInvoice",
       config: {
         policies: [],
@@ -20,7 +12,7 @@ module.exports = {
     },
     {
       method: "POST",
-      path: "/payments/receive_payment",
+      path: "/payments/receive-payment",
       handler: "payment.receivePayment",
       config: {
         policies: [],

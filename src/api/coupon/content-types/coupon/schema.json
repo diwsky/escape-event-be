@@ -20,6 +20,11 @@
     },
     "count": {
       "type": "integer"
+    },
+    "percentage": {
+      "type": "integer",
+      "max": 100,
+      "min": 0
     }
   }
 }

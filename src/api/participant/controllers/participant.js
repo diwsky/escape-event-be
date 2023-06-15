@@ -10,31 +10,42 @@ module.exports = createCoreController(
   "api::participant.participant",
   ({ strapi }) => ({
     async sendRegistrationMail(ctx) {
-      // const { sender, receiver } = ctx.request.body;
-      // console.log("sender, receiver: ", sender, receiver);
-      // await strapi.plugin("email").service("email").send({
-      //   to: "escapenice.event@gmail.com",
-      //   from: "escapenice.event@gmail.com",
-      //   subject: "Test Subject Nice",
-      //   html: "<b>Hello</b>",
-      // });
-      // test event vategory
-      // const category_uid = "gtr-5-k";
-      // strapi
-      //   .service("api::category.category")
-      //   .getEventAndCategoryName(category_uid);
-      const invoice_id = "648918c2a9ad2f0c687f237d";
+      const { invoice_id } = ctx.request.body;
 
+      console.log("invoice::::: ", invoice_id);
       try {
         await strapi
           .service("api::participant.participant")
           .sendRegistrationSuccessEmail(invoice_id);
+
+        ctx.response.status = 200;
+        ctx.response.body = true;
       } catch (error) {
         console.log("Error @ sending email: ", error);
         ctx.response.status = error.status;
         ctx.response.message = error.message;
+        ctx.response.body = false;
+      }
+    },
+    async getBibNumber(ctx) {
+      const { categoryUid } = ctx.request.query;
+
+      let bibNumber;
+      try {
+        bibNumber = await strapi
+          .service("api::participant.participant")
+          .createBibNumber(categoryUid);
+      } catch (error) {
+        console.log("Error @ get BIB number: ", JSON.parse(error));
+        ctx.response.status = error.status;
+        ctx.response.message = error.message;
         ctx.response.body = JSON.parse(error);
       }
+
+      console.log("bib number buatan: ", bibNumber);
+
+      ctx.response.status = 200;
+      ctx.response.body = { bib: bibNumber };
     },
   })
 );
