@@ -19,6 +19,7 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
       userDetailId,
       price,
       phone,
+      bib_name,
     } = body;
 
     // create payment invoice using xendit sdk
@@ -37,7 +38,9 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
         customer: {
           mobile_number: phone,
           email: email,
+          given_names: bib_name,
         },
+        should_send_email: true,
         customer_notification_preference: {
           invoice_created: ["whatsapp", "email"],
           invoice_paid: ["whatsapp", "email"],

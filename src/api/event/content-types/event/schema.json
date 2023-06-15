@@ -66,6 +66,17 @@
     },
     "enable": {
       "type": "boolean"
+    },
+    "schedule": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
     }
   }
 }
