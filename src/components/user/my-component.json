@@ -21,15 +21,13 @@
     "tshirt_size": {
       "type": "enumeration",
       "enum": [
-        "xxxs",
         "xxs",
         "xs",
         "s",
         "m",
         "l",
         "xl",
-        "xxl",
-        "xxxl"
+        "xxl"
       ]
     },
     "phone": {

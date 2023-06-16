@@ -94,6 +94,93 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
       ctx.response.body = JSON.parse(error);
     }
   },
+  async createMtInvoice(ctx, next) {
+    const body = ctx.request.body;
+
+    const {
+      email,
+      eventName,
+      eventUid,
+      categoryName,
+      categoryUid,
+      userDetailId,
+      price,
+      phone,
+      bib_name,
+    } = body;
+
+    // create payment invoice using xendit sdk
+    const Xendit = require("xendit-node");
+    const x = new Xendit({ secretKey: process.env.XENDIT_SECRET });
+
+    const { Invoice } = x;
+    const invoiceSpecificOptions = {};
+    const i = new Invoice(invoiceSpecificOptions);
+
+    try {
+      const invoice = await i.createInvoice({
+        externalID: `escape-${Date.now()}`,
+        description: `${eventName} - ${categoryName}`,
+        amount: price,
+        customer: {
+          mobile_number: phone,
+          email: email,
+          given_names: bib_name,
+        },
+        should_send_email: true,
+        customer_notification_preference: {
+          invoice_created: ["whatsapp", "email"],
+          invoice_paid: ["whatsapp", "email"],
+        },
+      });
+
+      console.log("Invoice created: ", invoice);
+
+      const { id, invoice_url, external_id, amount, status } = invoice;
+
+      // add invoice to the Payment data
+      const paymentEntry = await strapi.entityService.create(
+        "api::payment.payment",
+        {
+          data: {
+            invoice_id: id,
+            invoice_url,
+            external_id,
+            amount,
+            status,
+          },
+        }
+      );
+
+      // add to participant (without BIB)
+      try {
+        strapi
+          .service("api::participant.participant")
+          .addParticipantToEvent(
+            userDetailId,
+            categoryUid,
+            eventUid,
+            paymentEntry.id
+          );
+      } catch (error) {
+        console.log("Error @ add participant service: ", error);
+      }
+
+      ctx.response.status = 201;
+      ctx.response.body = {
+        invoice_id: id,
+        invoice_url,
+        external_id,
+        amount,
+        status,
+      };
+    } catch (error) {
+      console.log("error @ creating invoice: ", error);
+      ctx.response.status = 500;
+      ctx.response.message = error.message;
+      ctx.response.body = JSON.parse(error);
+    }
+  },
   async receivePayment(ctx) {
     try {
       const headers = ctx.request.headers;

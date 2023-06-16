@@ -12,6 +12,14 @@ module.exports = {
     },
     {
       method: "POST",
+      path: "/payments/mt/invoice",
+      handler: "payment.createMtInvoice",
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: "POST",
       path: "/payments/receive-payment",
       handler: "payment.receivePayment",
       config: {
