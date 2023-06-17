@@ -22,45 +22,56 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
       bib_name,
     } = body;
 
-    // create payment invoice using xendit sdk
-    const Xendit = require("xendit-node");
-    const x = new Xendit({ secretKey: process.env.XENDIT_SECRET });
+    // create payment invoice using midtrans sdk
+    const midtransClient = require("midtrans-client");
 
-    const { Invoice } = x;
-    const invoiceSpecificOptions = {};
-    const i = new Invoice(invoiceSpecificOptions);
+    const snap = new midtransClient.Snap({
+      isProduction: process.env.NODE_ENV == "prod",
+      serverKey: process.env.MIDTRANS_SECRET,
+    });
+
+    const external_id = `escape-${Date.now()}`;
+    const status = "PENDING";
+
+    const parameters = {
+      transaction_details: {
+        order_id: external_id,
+        gross_amount: price,
+        item_details: [
+          {
+            id: "1",
+            price: price,
+            quantity: 1,
+            name: `${eventName} - ${categoryName}`,
+          },
+        ],
+        customer_details: {
+          first_name: bib_name,
+          email: email,
+          phone: phone,
+        },
+      },
+    };
 
     try {
-      const invoice = await i.createInvoice({
-        externalID: `escape-${Date.now()}`,
-        description: `${eventName} - ${categoryName}`,
-        amount: price,
-        customer: {
-          mobile_number: phone,
-          email: email,
-          given_names: bib_name,
-        },
-        should_send_email: true,
-        customer_notification_preference: {
-          invoice_created: ["whatsapp", "email"],
-          invoice_paid: ["whatsapp", "email"],
-        },
-      });
+      // console.log("Invoice created: ", invoice);
+      const invoice = await snap.createTransaction(parameters);
+
+      const { token, redirect_url: invoice_url } = invoice;
 
       console.log("Invoice created: ", invoice);
-
-      const { id, invoice_url, external_id, amount, status } = invoice;
 
       // add invoice to the Payment data
       const paymentEntry = await strapi.entityService.create(
         "api::payment.payment",
         {
           data: {
-            invoice_id: id,
+            invoice_id: external_id,
             invoice_url,
             external_id,
-            amount,
+            amount: price,
             status,
+            token,
           },
         }
       );
@@ -81,98 +92,12 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
 
       ctx.response.status = 201;
       ctx.response.body = {
-        invoice_id: id,
+        invoice_id: external_id,
         invoice_url,
         external_id,
-        amount,
-        status,
-      };
-    } catch (error) {
-      console.log("error @ creating invoice: ", error);
-      ctx.response.status = 500;
-      ctx.response.message = error.message;
-      ctx.response.body = JSON.parse(error);
-    }
-  },
-  async createMtInvoice(ctx, next) {
-    const body = ctx.request.body;
-
-    const {
-      email,
-      eventName,
-      eventUid,
-      categoryName,
-      categoryUid,
-      userDetailId,
-      price,
-      phone,
-      bib_name,
-    } = body;
-
-    // create payment invoice using xendit sdk
-    const Xendit = require("xendit-node");
-    const x = new Xendit({ secretKey: process.env.XENDIT_SECRET });
-
-    const { Invoice } = x;
-    const invoiceSpecificOptions = {};
-    const i = new Invoice(invoiceSpecificOptions);
-
-    try {
-      const invoice = await i.createInvoice({
-        externalID: `escape-${Date.now()}`,
-        description: `${eventName} - ${categoryName}`,
         amount: price,
-        customer: {
-          mobile_number: phone,
-          email: email,
-          given_names: bib_name,
-        },
-        should_send_email: true,
-        customer_notification_preference: {
-          invoice_created: ["whatsapp", "email"],
-          invoice_paid: ["whatsapp", "email"],
-        },
-      });
-
-      console.log("Invoice created: ", invoice);
-
-      const { id, invoice_url, external_id, amount, status } = invoice;
-
-      // add invoice to the Payment data
-      const paymentEntry = await strapi.entityService.create(
-        "api::payment.payment",
-        {
-          data: {
-            invoice_id: id,
-            invoice_url,
-            external_id,
-            amount,
-            status,
-          },
-        }
-      );
-
-      // add to participant (without BIB)
-      try {
-        strapi
-          .service("api::participant.participant")
-          .addParticipantToEvent(
-            userDetailId,
-            categoryUid,
-            eventUid,
-            paymentEntry.id
-          );
-      } catch (error) {
-        console.log("Error @ add participant service: ", error);
-      }
-
-      ctx.response.status = 201;
-      ctx.response.body = {
-        invoice_id: id,
-        invoice_url,
-        external_id,
-        amount,
         status,
+        token,
       };
     } catch (error) {
       console.log("error @ creating invoice: ", error);
@@ -183,38 +108,58 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
   },
   async receivePayment(ctx) {
     try {
-      const headers = ctx.request.headers;
+      // const headers = ctx.request.headers;
       const body = ctx.request.body;
 
-      const webhookId = headers["webhook-id"];
-      const token = headers["x-callback-token"];
+      console.log("body receive payment: ", body);
+
+      // const webhookId = headers["webhook-id"];
+      // const token = headers["x-callback-token"];
 
       // check if token is not same (not from xendit), reject!
-      if (token != process.env.XENDIT_CALLBACK_TOKEN) {
-        ctx.response.status = 403;
-        ctx.response.message = "Identity not valid!";
-        return;
-      }
+      // if (token != process.env.XENDIT_CALLBACK_TOKEN) {
+      //   ctx.response.status = 403;
+      //   ctx.response.message = "Identity not valid!";
+      //   return;
+      // }
 
       // check if webhook duplicate, reject!
-      const duplicateWebhook = await strapi.entityService.findMany(
-        "api::payment.payment",
-        {
-          filters: {
-            webhook_id: webhookId,
-          },
-        }
-      );
+      // const duplicateWebhook = await strapi.entityService.findMany(
+      //   "api::payment.payment",
+      //   {
+      //     filters: {
+      //       webhook_id: webhookId,
+      //     },
+      //   }
+      // );
 
-      if (duplicateWebhook.length > 0) {
-        ctx.response.status = 409;
-        ctx.response.message = "Duplicate callback!";
-        console.log("Error @ receive payment - duplicate webhook!");
-        return;
-      }
+      // if (duplicateWebhook.length > 0) {
+      //   ctx.response.status = 409;
+      //   ctx.response.message = "Duplicate callback!";
+      //   console.log("Error @ receive payment - duplicate webhook!");
+      //   return;
+      // }
 
       // update the payment status
-      const { id, status, payment_channel } = body;
+      // const { id, status, payment_channel } = body;
+      const {
+        transaction_status,
+        gross_amount: amount,
+        transaction_id: webhookId,
+        order_id: id,
+        payment_type: payment_channel,
+      } = body;
+
+      let status = "PENDING";
+
+      if (
+        transaction_status == "capture" ||
+        transaction_status == "settlement"
+      ) {
+        status = "PAID";
+      } else if (transaction_status == "expire") {
+        status = "EXPIRED";
+      }
 
       const updated = await strapi.db.query("api::payment.payment").update({
         where: {
@@ -227,6 +172,12 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
           channel: payment_channel,
         },
       });
+
+      // TODO handle expired transaction!
+      if (status != "PAID") {
+        ctx.response.status = 200;
+        return;
+      }
 
       // update paid user to participant table
       try {

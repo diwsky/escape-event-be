@@ -37,6 +37,9 @@
     },
     "channel": {
       "type": "string"
+    },
+    "token": {
+      "type": "string"
     }
   }
 }
