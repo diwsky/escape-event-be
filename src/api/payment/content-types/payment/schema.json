@@ -40,6 +40,9 @@
     },
     "token": {
       "type": "string"
+    },
+    "coupon": {
+      "type": "string"
     }
   }
 }

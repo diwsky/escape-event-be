@@ -20,6 +20,7 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
       price,
       phone,
       bib_name,
+      code,
     } = body;
 
     // create payment invoice using midtrans sdk
@@ -54,7 +55,6 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
     };
 
     try {
-      // console.log("Invoice created: ", invoice);
       const invoice = await snap.createTransaction(parameters);
 
       const { token, redirect_url: invoice_url } = invoice;
@@ -72,6 +72,7 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
             amount: price,
             status,
             token,
+            coupon: code,
           },
         }
       );
@@ -108,47 +109,30 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
   },
   async receivePayment(ctx) {
     try {
-      // const headers = ctx.request.headers;
       const body = ctx.request.body;
 
       console.log("body receive payment: ", body);
 
-      // const webhookId = headers["webhook-id"];
-      // const token = headers["x-callback-token"];
-
-      // check if token is not same (not from xendit), reject!
-      // if (token != process.env.XENDIT_CALLBACK_TOKEN) {
-      //   ctx.response.status = 403;
-      //   ctx.response.message = "Identity not valid!";
-      //   return;
-      // }
-
-      // check if webhook duplicate, reject!
-      // const duplicateWebhook = await strapi.entityService.findMany(
-      //   "api::payment.payment",
-      //   {
-      //     filters: {
-      //       webhook_id: webhookId,
-      //     },
-      //   }
-      // );
-
-      // if (duplicateWebhook.length > 0) {
-      //   ctx.response.status = 409;
-      //   ctx.response.message = "Duplicate callback!";
-      //   console.log("Error @ receive payment - duplicate webhook!");
-      //   return;
-      // }
-
-      // update the payment status
-      // const { id, status, payment_channel } = body;
       const {
         transaction_status,
         gross_amount: amount,
         transaction_id: webhookId,
         order_id: id,
         payment_type: payment_channel,
+        signature_key,
+        status_code,
       } = body;
+
+      // check signature key
+      const raw = `${id}${status_code}${amount}${process.env.MIDTRANS_SECRET}`;
+      var crypto = require("crypto");
+      const key = crypto.createHash("sha512").update(raw).digest("hex");
+
+      if (signature_key != key) {
+        ctx.response.status = 403;
+        ctx.response.body = "Signature invalid!";
+        return;
+      }
 
       let status = "PENDING";
 
@@ -157,11 +141,15 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
         transaction_status == "settlement"
       ) {
         status = "PAID";
-      } else if (transaction_status == "expire") {
+      } else if (
+        transaction_status == "expire" ||
+        transaction_status == "cancel" ||
+        transaction_status == "deny"
+      ) {
         status = "EXPIRED";
       }
 
-      const updated = await strapi.db.query("api::payment.payment").update({
+      await strapi.db.query("api::payment.payment").update({
         where: {
           invoice_id: id,
         },
