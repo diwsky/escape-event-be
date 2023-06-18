@@ -21,6 +21,7 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
       phone,
       bib_name,
       code,
+      userId,
     } = body;
 
     // create payment invoice using midtrans sdk
@@ -77,16 +78,33 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
         }
       );
 
-      // add to participant (without BIB)
       try {
-        strapi
+        // check if participant already have data
+        const participantId = await strapi
           .service("api::participant.participant")
-          .addParticipantToEvent(
-            userDetailId,
-            categoryUid,
-            eventUid,
-            paymentEntry.id
-          );
+          .isUserAlreadyParticipant(userId, eventUid, categoryUid);
+
+        if (participantId != null) {
+          // just update the data
+          await strapi
+            .service("api::participant.participant")
+            .updateParticipantData(
+              userDetailId,
+              participantId,
+              paymentEntry.id
+            );
+        } else {
+          // add to participant (without BIB)
+
+          await strapi
+            .service("api::participant.participant")
+            .addParticipantToEvent(
+              userDetailId,
+              categoryUid,
+              eventUid,
+              paymentEntry.id
+            );
+        }
       } catch (error) {
         console.log("Error @ add participant service: ", error);
       }

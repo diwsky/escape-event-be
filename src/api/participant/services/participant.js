@@ -9,6 +9,68 @@ const { createCoreService } = require("@strapi/strapi").factories;
 module.exports = createCoreService(
   "api::participant.participant",
   ({ strapi }) => ({
+    async isUserAlreadyParticipant(userId, eventUid, categoryUid) {
+      const result = await strapi.entityService.findMany(
+        "api::participant.participant",
+        {
+          filters: {
+            user_id: userId,
+            event_uid: eventUid,
+            category_uid: categoryUid,
+          },
+        }
+      );
+
+      if (result.length < 1) {
+        return null;
+      } else {
+        return result[0].id;
+      }
+    },
+    async updateParticipantData(userDetailId, participantId, paymentId) {
+      // get updated user detail first
+      const { user_detail } = await strapi.entityService.findOne(
+        "api::user-detail.user-detail",
+        userDetailId,
+        {
+          populate: {
+            user_detail: {
+              fields: "*",
+            },
+          },
+        }
+      );
+
+      delete user_detail.id;
+
+      // gain previous payment data
+      const { payments } = await strapi.entityService.findOne(
+        "api::participant.participant",
+        participantId,
+        {
+          populate: {
+            payments: {
+              fields: ["id"],
+            },
+          },
+        }
+      );
+
+      const arrPaymentId = payments.map((pay) => pay.id);
+      arrPaymentId.push(paymentId);
+
+      const updatedParticipant = await strapi.entityService.update(
+        "api::participant.participant",
+        participantId,
+        {
+          data: {
+            user_detail,
+            payments: arrPaymentId,
+          },
+        }
+      );
+    },
+
     async addParticipantToEvent(
       userDetailId,
       categoryUid,
@@ -156,8 +218,6 @@ module.exports = createCoreService(
           message: `Participant with invoice ${invoice_id} did not found!`,
         };
       }
-
-      console.log("participant: ", participantsWithInvoice[0]);
 
       return participantsWithInvoice[0];
     },
