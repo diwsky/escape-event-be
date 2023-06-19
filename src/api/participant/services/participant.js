@@ -258,7 +258,7 @@ module.exports = createCoreService(
           .service("email")
           .send({
             to: user_detail.email,
-            bcc: "escapenice.event@gmail.com",
+            bcc: "escapenice.event@gmail.com,escape.nice@gmail.com",
             from: `Escape Nice <${process.env.MAIL_FROM}>`,
             subject: `Pendaftaran ${eventName}`,
             html: content,
