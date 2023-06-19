@@ -222,16 +222,24 @@ module.exports = createCoreService(
       return participantsWithInvoice[0];
     },
     async sendRegistrationSuccessEmail(invoice_id) {
-      const {
-        category_uid,
-        user_detail,
-        payments: [{ external_id, channel }],
-        bib,
-      } = await strapi
+      const { category_uid, user_detail, payments, bib } = await strapi
         .service("api::participant.participant")
         .getParticipantWithInvoice(invoice_id);
 
       try {
+        const invoiceSelected = payments.filter((payment) => {
+          return payment.invoice_id == invoice_id;
+        });
+
+        if (invoiceSelected.length < 1) {
+          throw {
+            status: 404,
+            message: `Invoice ID ${invoice_id} strangely not found!`,
+          };
+        }
+
+        const { external_id, channel } = invoiceSelected[0];
+
         const { eventName, categoryName } = await strapi
           .service("api::category.category")
           .getEventAndCategoryName(category_uid);
