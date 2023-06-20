@@ -39,19 +39,19 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
       transaction_details: {
         order_id: external_id,
         gross_amount: price,
-        item_details: [
-          {
-            id: "1",
-            price: price,
-            quantity: 1,
-            name: `${eventName} - ${categoryName}`,
-          },
-        ],
-        customer_details: {
-          first_name: bib_name,
-          email: email,
-          phone: phone,
+      },
+      item_details: [
+        {
+          id: "1",
+          price: price,
+          quantity: 1,
+          name: `${eventName} - ${categoryName}`,
         },
+      ],
+      customer_details: {
+        first_name: bib_name,
+        email: email,
+        phone: phone,
       },
     };
 
