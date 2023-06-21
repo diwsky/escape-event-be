@@ -19,7 +19,7 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
       userDetailId,
       price,
       phone,
-      bib_name,
+      name,
       code,
       userId,
     } = body;
@@ -49,9 +49,13 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
         },
       ],
       customer_details: {
-        first_name: bib_name,
+        first_name: name,
         email: email,
         phone: phone,
+      },
+      custom_expiry: {
+        expiry_duration: 1,
+        unit: "day",
       },
     };
 

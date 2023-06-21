@@ -258,7 +258,9 @@ module.exports = createCoreService(
           .service("email")
           .send({
             to: user_detail.email,
-            bcc: "escapenice.event@gmail.com,escape.nice@gmail.com",
+            bcc: `escapenice.event@gmail.com${
+              process.env.NODE_ENV == "prod" ? ",escape.nice@gmail.com" : ""
+            }`,
             from: `Escape Nice <${process.env.MAIL_FROM}>`,
             subject: `Pendaftaran ${eventName}`,
             html: content,
@@ -400,7 +402,9 @@ const gtrEmailTemplate = ({
 <div>
 <p style="margin: 0;">Berikut adalah detail registrasi Anda:</p>
 <p style="margin: 0;">&nbsp;</p>
-<p style="margin: 0;">Nomor Pembayaran: <strong>${external_id}</strong><br />Pembayaran: <strong>${channel}</strong><br />Kategori: <strong>${categoryName}</strong><br />Nama BIB: <strong>${
+<p style="margin: 0;">Nomor Pembayaran: <strong>${external_id}</strong><br />Pembayaran: <strong>${channel}</strong><br />Kategori: <strong>${categoryName}</strong><br />Nama Lengkap: <strong>${
+    user_detail.name
+  }</strong><br />Nama BIB: <strong>${
     user_detail.bib_name
   }</strong><br />Tanggal Lahir: <strong>${user_detail.dob}</strong></p>
 </div>
