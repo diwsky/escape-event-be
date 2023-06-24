@@ -147,7 +147,7 @@ module.exports = createCoreService(
     },
     async createBibNumber(category_uid) {
       // count participant first
-      const participantCountAtCategory = await strapi.db
+      let participantCountAtCategory = await strapi.db
         .query("api::participant.participant")
         .count({
           where: {
@@ -156,13 +156,16 @@ module.exports = createCoreService(
                 category_uid,
               },
               {
-                payments: {
-                  status: "PAID",
+                bib: {
+                  $ne: null,
                 },
               },
             ],
           },
         });
+
+      // add +1 because counting on bib number that not null
+      participantCountAtCategory++;
 
       console.log(
         "updateParticipantAfterPayment - count: ",
