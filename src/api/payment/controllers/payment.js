@@ -54,7 +54,7 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
         phone: phone,
       },
       custom_expiry: {
-        expiry_duration: 1,
+        expiry_duration: 2,
         unit: "day",
       },
     };
