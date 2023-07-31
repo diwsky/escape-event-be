@@ -147,53 +147,22 @@ module.exports = createCoreService(
     },
     async createBibNumber(category_uid) {
       // count participant first
-      let participantCountAtCategory = await strapi.db
+      let lastBib = await strapi.db
         .query("api::participant.participant")
-        .count({
+        .findOne({
+          select: "bib",
+          orderBy: { bib: "desc" },
           where: {
-            $and: [
-              {
-                category_uid,
-              },
-              {
-                bib: {
-                  $ne: null,
-                },
-              },
-            ],
+            category_uid: category_uid,
           },
         });
 
+      let bibNumber = lastBib.bib;
+
       // add +1 because counting on bib number that not null
-      participantCountAtCategory++;
+      bibNumber++;
 
-      console.log(
-        "updateParticipantAfterPayment - count: ",
-        participantCountAtCategory
-      );
-
-      const categoryBibs = await strapi.entityService.findMany(
-        "api::category.category",
-        {
-          fields: ["bib_category"],
-          filters: {
-            uid: category_uid,
-          },
-        }
-      );
-
-      if (categoryBibs.length < 1) {
-        throw {
-          status: 404,
-          message: `Category BIB for ${category_uid} not yet set!`,
-        };
-      }
-
-      const { bib_category } = categoryBibs[0];
-
-      const bibNumber = `${bib_category}${participantCountAtCategory
-        .toString()
-        .padStart(3, "0")}`;
+      console.log("updateParticipantAfterPayment - count: ", bibNumber);
 
       return bibNumber;
     },
