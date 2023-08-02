@@ -153,7 +153,7 @@ module.exports = createCoreService(
           select: "bib",
           orderBy: { bib: "desc" },
           where: {
-            and: [
+            $and: [
               {
                 category_uid,
               },
