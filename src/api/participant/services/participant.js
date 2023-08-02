@@ -173,7 +173,7 @@ module.exports = createCoreService(
 
       console.log("updateParticipantAfterPayment - count: ", bibNumber);
 
-      return bibNumber;
+      return `${bibNumber}`;
     },
     async getParticipantWithInvoice(invoice_id) {
       const participantsWithInvoice = await strapi.entityService.findMany(
