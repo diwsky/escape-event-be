@@ -10,6 +10,7 @@
     "strapi": "strapi"
   },
   "dependencies": {
+    "@strapi-community/strapi-provider-upload-google-cloud-storage": "^4.10.5",
     "@strapi/plugin-i18n": "4.9.1",
     "@strapi/plugin-users-permissions": "4.9.1",
     "@strapi/provider-email-nodemailer": "^4.11.0",
