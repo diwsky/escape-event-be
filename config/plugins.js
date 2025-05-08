@@ -10,6 +10,7 @@ module.exports = ({ env }) => ({
         publicFiles: env("GCS_PUBLIC_FILES"),
         uniform: env("GCS_UNIFORM"),
       },
+
       // provider: "aws-s3",
       // providerOptions: {
       //   accessKeyId: env("AWS_ACCESS_KEY_ID"),
